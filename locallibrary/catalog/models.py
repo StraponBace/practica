@@ -1,6 +1,9 @@
 from django.db import models
 from django.urls import reverse
-import uuid # Required for unique book instances
+import uuid
+from django.conf import settings
+from datetime import date
+
 
 class Genre(models.Model):
     """
@@ -59,6 +62,7 @@ class BookInstance(models.Model):
     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True)
     imprint = models.CharField(max_length=200)
     due_back = models.DateField(null=True, blank=True)
+    borrower = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     LOAN_STATUS = (
         ('m', 'Maintenance'),
@@ -71,7 +75,7 @@ class BookInstance(models.Model):
 
     class Meta:
         ordering = ["due_back"]
-
+        permissions = (("can_mark_returned", "Set book as returned"),)
 
     def __str__(self):
         """
@@ -79,12 +83,18 @@ class BookInstance(models.Model):
         """
         return '%s (%s)' % (self.id,self.book.title)
 
+    @property
+    def is_overdue(self):
+        """Determines if the book is overdue based on due date and current date."""
+        return bool(self.due_back and date.today() > self.due_back)
+
+
 class Author(models.Model):
     """Model representing an author."""
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
-    date_of_death = models.DateField('Died', null=True, blank=True)
+    date_of_death = models.DateField('died', null=True, blank=True)
 
     class Meta:
         ordering = ['last_name', 'first_name']

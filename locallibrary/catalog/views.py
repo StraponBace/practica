@@ -170,8 +170,8 @@ class BookUpdate(PermissionRequiredMixin, UpdateView):
 
 class BookDelete(PermissionRequiredMixin, DeleteView):
     model = Book
-    succes_url = reverse_lazy('books')
-    permission_required = 'catalog.delete_book'
+    success_url = reverse_lazy('Book')
+    permission_required = 'catalog.delete_Book'
 
     def form_valid(self, form):
         try:
@@ -179,5 +179,5 @@ class BookDelete(PermissionRequiredMixin, DeleteView):
             return HttpResponseRedirect(self.success_url)
         except Exception as e:
             return HttpResponseRedirect(
-                reverse("book-delete", kwargs={"pk": self.object.pk})
+                reverse("Book-delete", kwargs={"pk": self.object.pk})
             )
